@@ -1,12 +1,14 @@
 package com.vergaraaa.backend.service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vergaraaa.backend.controller.RegisterRequest;
+import com.vergaraaa.backend.exceptions.SpringRedditException;
 import com.vergaraaa.backend.model.NotificationEmail;
 import com.vergaraaa.backend.model.User;
 import com.vergaraaa.backend.model.VerificationToken;
@@ -56,5 +58,22 @@ public class AuthService {
         verificationTokenRepository.save(verificationToken);
 
         return token;
+    }
+
+    public void verifiyAccount(String token) {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new SpringRedditException("Invalid token"));
+
+        fetchUserAndEnable(verificationToken.get());
+    }
+
+    @Transactional
+    private void fetchUserAndEnable(VerificationToken verificationToken) {
+        String username = verificationToken.getUser().getUsername();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new SpringRedditException("User not found with name " + username));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }

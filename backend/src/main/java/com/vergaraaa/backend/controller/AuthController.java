@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.vergaraaa.backend.service.AuthService;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @AllArgsConstructor
@@ -23,5 +25,12 @@ public class AuthController {
         authService.signup(registerRequest);
 
         return new ResponseEntity<>("User Registration Succesful", HttpStatus.OK);
+    }
+
+    @GetMapping("accountVerification/{token}")
+    public ResponseEntity<String> verifiyAccount(@PathVariable String token) {
+        authService.verifiyAccount(token);
+
+        return new ResponseEntity<>("Account activated succesfully", HttpStatus.OK);
     }
 }
